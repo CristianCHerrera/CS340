@@ -1,0 +1,43 @@
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+
+class AnimalShelter(object):
+    """ CRUD operations for Animal collection in MongoDB """
+
+    def __init__(self,username = "aacuser" ,password = "12345"):
+
+        # Initializing the MongoClient. This helps to 
+        # access the MongoDB databases and collections. 
+        self.client = MongoClient('mongodb://%s:%s@localhost:48538/?authMechanism=DEFAULT&authSource=AAC'%(username, password))
+        self.database = self.client['AAC']
+
+# Complete this create method to implement the C in CRUD.
+    def create(self, data):
+        if data is not None:
+            self.database.animals.insert(data)  # data should be dictionary   
+            return ("Entry created")
+        else:
+            raise Exception("Nothing to save, because data parameter is empty")
+            
+    def read_all(self,data):
+        cursor = self.database.animals.find(data, {'_id':False}) #Return a cursor which points to a list of results (documents)
+        return cursor
+    
+    def read(self,data):
+        return self.database.animals.find_one(data) #Returns one document as python dictionary
+    
+    def update(self,data,newData): #Updates chosen document
+        if data is not None:
+            updated = self.database.animals.update_one(data,{"$set":newData})
+            self.database.animals.find_one(newData)
+            return updated.raw_result ,self.database.animals.find_one(newData)
+        else:
+            raise Exception("Error")
+      
+    def delete(self,data):    #Deletes chosen document
+        if data is not None:
+            deleted = self.database.animals.delete_many(data)
+            return (deleted.deleted_count, "Entries deleted")
+        else:
+            raise Exception("Error")
+    
